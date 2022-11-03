@@ -1,0 +1,120 @@
+Sub Summary()
+
+Dim no_sheets As Integer
+Dim tic As String
+Dim OValue As Double
+Dim totstock As Double
+Dim Sumrow As Integer
+Dim FinSheet As Double
+Dim LastRow As Long
+
+Dim GInc As Double
+Dim GDec As Double
+Dim GTVol As Double
+
+no_sheets = Application.Sheets.Count
+
+For v = 1 To no_sheets
+
+    Sheets(v).Activate
+    Cells(1, 11).Value = "Ticker"
+    Cells(1, 12).Value = "Yearly Change"
+    Cells(1, 13).Value = "Percent Change"
+    Cells(1, 14).Value = "Total Stock Volume"
+
+    Range("K1").EntireColumn.ColumnWidth = Len(Cells(1, 11).Value)
+    Range("L1").EntireColumn.ColumnWidth = Len(Cells(1, 12).Value)
+    Range("M1").EntireColumn.ColumnWidth = Len(Cells(1, 13).Value)
+    Range("N1").EntireColumn.ColumnWidth = Len(Cells(1, 14).Value)
+    
+    Range("M:M").NumberFormat = "0.00%"
+    Range("C:F").NumberFormat = "#,##0.00"
+    
+    FinSheet = Cells(Rows.Count, 1).End(xlUp).Row
+    
+    tic = Cells(2, 1).Value
+    OValue = Cells(2, 3).Value
+    
+    totstock = totstock + Cells(2, 7).Value
+    Sumrow = 2
+    
+    For Row = 3 To FinSheet
+    
+        If Cells(Row, 1) = tic Then
+            
+           totstock = totstock + Cells(Row, 7).Value
+        Else
+           Cells(Sumrow, 11).Value = tic
+           
+           Cells(Sumrow, 12).Value = Cells(Row - 1, 6).Value - OValue
+           
+           If Cells(Sumrow, 12).Value < 0 Then
+                Cells(Sumrow, 12).Interior.ColorIndex = 3
+           Else
+                Cells(Sumrow, 12).Interior.ColorIndex = 4
+           End If
+           
+           Cells(Sumrow, 13).Value = Cells(Sumrow, 12).Value / OValue
+           Cells(Sumrow, 14).Value = totstock
+           
+           tic = Cells(Row, 1).Value
+           OValue = Cells(Row, 3).Value
+           totstock = Cells(Row, 7).Value
+           Sumrow = Sumrow + 1
+           
+        End If
+        
+     Next Row
+     
+     'Bonus
+                 
+     Range("Q2").Value = "Greatest % Increase"
+     Range("Q3").Value = "Greatest % Decrease"
+     Range("Q4").Value = "Greatest Total Volume"
+     Range("R1").Value = "Ticker"
+     Range("S1").Value = "Value"
+     Range("Q1").EntireColumn.ColumnWidth = Len(Range("Q4").Value)
+     Range("S:S").NumberFormat = "0.00%"
+     
+     With ActiveSheet
+        LastRow = .Cells(.Rows.Count, "M").End(xlUp).Row
+     End With
+          
+     GInc = 0
+     GDec = 0
+     For x = 2 To LastRow
+        If GInc < Cells(x, 13).Value Then
+            GInc = Cells(x, 13).Value
+            GDec = x
+        End If
+     Next
+     Range("R2").Value = Cells(GDec, 11)
+     Range("S2").Value = GInc
+     
+     GDec = 0
+     For x = 2 To LastRow
+        If GDec > Cells(x, 13).Value Then
+            GDec = Cells(x, 13).Value
+            GInc = x
+        End If
+     Next
+     Range("R3").Value = Cells(GInc, 11)
+     Range("S3").Value = GDec
+ 
+     GTVol = 0
+     For x = 2 To LastRow
+        If GTVol < Cells(x, 14).Value Then
+            GTVol = Cells(x, 14).Value
+            GInc = x
+        End If
+     Next
+     Range("R4").Value = Cells(GInc, 11)
+     Range("S4").Value = GTVol
+     Range("S4").NumberFormat = "####################0"
+Next
+End Sub
+Sub clearsummary()
+    Range("K:S").Value = ""
+    Range("L:L").Interior.ColorIndex = 0
+End Sub
+
